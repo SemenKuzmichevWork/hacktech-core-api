@@ -1,0 +1,717 @@
+openapi: 3.0.3
+info:
+  title: Core-API
+  description: Stores events, user answers and user data. Provides statistics by different parameters.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUsersRequest"
+      responses:
+        "200":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Get users by filters 
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: ids 
+          in: query
+          schema:
+            type: array 
+            items: 
+              $ref: "#/components/schemas/UserID"
+            example: [ "0073d934-9dfe-11ef-8271-cf2a107e83d5", "0a54f80c-9dfe-11ef-b771-133c257fb62e" ]
+        - name: roles
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            example: [ "admin", "user" ]
+        - name: family_status
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            example: [ "single", "married" ]
+        - name: company_position
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+            example: "John"
+        - name: work_since
+          in: query
+          schema:
+            type: string
+            format: date
+            example: "2024-11-08"
+        - name: departments
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+            example: [ "HR", "IT" ]
+        - name: is_active
+          in: query 
+          schema: 
+            type: boolean
+            example: true
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /users/{id}:
+    patch:
+      summary: Update user details
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserBody"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: User deleted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events:
+    post:
+      summary: Create an event
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventBody"
+      responses:
+        "200":
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Get all events
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/EventID"
+            example: [ "0073d934-9dfe-11ef-8271-cf2a107e83d5", "0a54f80c-9dfe-11ef-b771-133c257fb62e" ]
+        - name: identifier
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/EventIdentifier"
+            example: [ "12313122323123132.12312313123", "123123123123123.123123213213213123" ]
+
+      responses:
+        "200":
+          description: List of events          
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events/{id}:
+    get:
+      summary: Get an event by ID
+      parameters:
+        - name: "id"
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update an event
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventBody"
+      responses:
+        "200":
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete an event
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Event deleted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user-reports:
+    post:
+      summary: Create a user report
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserReportBody"
+      responses:
+        "201":
+          description: User report created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReport"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user-reports/{id}:
+    patch:
+      operationId: updateUserReport
+      summary: Update a user report
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserReportID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserReportBody"
+      responses:
+        "200":
+          description: User report updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReport"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user-reports/kpi:
+    post:
+      summary: Create a user KPI
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmploeeyKPI"
+      responses:
+        "201":
+          description: User KPI created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmploeeyKPI"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserID:
+      type: string
+      format: uuid
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    
+    CreateUsersRequest:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserBody"
+
+    CreateUsersResponse:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    UserBody:
+      type: object
+      required:
+        - slack_id
+        - is_admin
+        - role
+        - family_status
+        - company_position
+        - sex
+        - is_active
+        - joined_at
+        - departments
+      properties:
+        slack_id:
+          type: string
+          example: "U12345678"
+        is_admin:
+          type: boolean
+          example: false
+        role:
+          type: string
+          pattern: ".+"
+        family_status:
+          type: string
+          default: "unknown"
+          enum:
+            - unknown
+            - single
+            - married
+        company_position:
+          type: string
+          pattern: ".+"
+        sex:
+          type: string
+          enum: [female, male, other]
+          example: "female"
+        is_active:
+          type: boolean
+          example: true
+        joined_at:
+          type: string
+          format: date
+          example: "2024-11-08"
+        departments:
+          type: array
+          items:
+            type: string
+          example: [ "HR", "IT" ]
+
+    User:
+      type: object
+      required:
+        - id
+        - body
+      properties:
+        id:
+          $ref: "#/components/schemas/UserID"
+        body:
+          $ref: "#/components/schemas/UserBody"
+
+    UserReportID:
+      type: string
+      format: uuid
+      example: "123e4567-e89b-12d3-a456-426614174000"
+
+    UserReport:
+      type: object
+      required: [id, body]
+      properties:
+        id:
+          $ref: "#/components/schemas/UserReportID"
+        body:
+          $ref: "#/components/schemas/UserReportBody"
+
+    UserReportBody:
+      type: object
+      required:
+        - reported_by
+        - description
+        - kind
+        - rating
+      properties:
+        reported_by:
+          type: string
+          format: ".+"
+          description: slack_id of the user who made the report
+          example: "U12345678"
+        rating:
+          type: integer
+          example: 5
+        kind:
+          type: string
+          enum:
+            - event 
+            - business 
+            - project_participation
+            - daily_checkups
+          example: "user"
+
+    EventID:
+      type: string
+      format: uuid
+      example: "456e7891-e89b-12d3-a456-426614174000"
+
+    EventIdentifier:
+      type: string
+      example: "1231232131232132313131.123131231231313"
+
+    Event:
+      type: object
+      required: [id, body]
+      properties:
+        id:
+          $ref: "#/components/schemas/EventID"
+        body:
+          $ref: "#/components/schemas/EventBody"
+
+    EventBody:
+      type: object
+      required:
+        - is_sent 
+        - title
+        - description
+        - created_by_slack_id
+        - identifier
+      properties:
+        is_sent:
+          type: boolean
+          example: false
+        title:
+          type: string
+          example: "Team building"
+        description:
+          type: string
+          example: "Party in the office"
+        created_by_slack_id:
+          type: string 
+          format: ".+"
+          description: slack_id of the user who created the event
+        identifier:
+          type: string
+          description: unique custom identifier of event from slack
+    EmploeeyKPI:
+      type: object
+      required:
+        - date
+        - roads 
+        - engagement
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2024-11-08"
+        roads:
+          type: number
+          example: 1.2
+        engagement:
+          type: number
+          example: 0.9
+
+    JWT:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          enum: [admin, user, slack]
+          example: "user"
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "Bad request"
+security:
+  - BearerAuth: []
